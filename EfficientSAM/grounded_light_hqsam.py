@@ -16,11 +16,11 @@ GROUNDING_DINO_CONFIG_PATH = "GroundingDINO/groundingdino/config/GroundingDINO_S
 GROUNDING_DINO_CHECKPOINT_PATH = "./groundingdino_swint_ogc.pth"
 
 # Building GroundingDINO inference model
-grounding_dino_model = Model(model_config_path=GROUNDING_DINO_CONFIG_PATH, model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH)
+grounding_dino_model = Model(model_config_path=GROUNDING_DINO_CONFIG_PATH, model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH, device=DEVICE)
 
 # Building MobileSAM predictor
 HQSAM_CHECKPOINT_PATH = "./EfficientSAM/sam_hq_vit_tiny.pth"
-checkpoint = torch.load(HQSAM_CHECKPOINT_PATH)
+checkpoint = torch.load(HQSAM_CHECKPOINT_PATH, map_location=DEVICE)
 light_hqsam = setup_model()
 light_hqsam.load_state_dict(checkpoint, strict=True)
 light_hqsam.to(device=DEVICE)
