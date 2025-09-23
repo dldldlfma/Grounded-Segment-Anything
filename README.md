@@ -1,3 +1,52 @@
+## Env
+
+
+The original **Grounded-Segment-Anything** repository cannot run with the **latest environment**
+(latest `torch`, `timm`, `supervision`, etc.) without modifications.  
+To make it work, you need to update some code manually:
+---
+
+### 1. CUDA Extension Fix (GroundingDINO)
+- File to modify:
+To use it, change some code
+
+```bash
+Grounded-Segment-Anything/GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu # compare original code and this
+```
+- Problem: Old ATen API (`.type().is_cuda()`, `.data<T>()`, etc.) does not work with new PyTorch.
+- Fix: Replace with new style:
+- `value.type().is_cuda()` → `value.is_cuda()`
+- `value.data<scalar_t>()` → `value.data_ptr<scalar_t>()`
+- Also update `AT_DISPATCH_FLOATING_TYPES` → use `value.scalar_type()`
+
+### 2. Supervision API Update (EfficientSAM)
+- Files to check:
+```bash
+Grounded-Segment-Anything/EfficientSAM/*.py 
+```
+- Problem: `supervision.BoxAnnotator.annotate(..., labels=...)`  
+  - In the latest `supervision`, `annotate()` no longer accepts `labels` directly.
+- Fix: Use `LabelAnnotator` instead, or adapt to the new API.  
+- Example: Check the grounded_light_hq_sam.py file which is already update
+
+
+### HW Env
+
+- CPU : intel Core Ultra 7 265K
+- GPU : RTX 5060ti
+- CUDA : 12.8
+- OS : Rocky 9 [kernel : 5.14.0]
+
+### Python venv
+- python3.10
+- torch==2.8.0
+- torchvision==0.23.0
+- supervision==0.26.1
+
+
+
+---
+
 ![](./assets/Grounded-SAM_logo.png)
 
 # Grounded-Segment-Anything
