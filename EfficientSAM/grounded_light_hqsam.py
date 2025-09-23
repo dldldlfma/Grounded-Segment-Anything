@@ -47,13 +47,26 @@ detections = grounding_dino_model.predict_with_classes(
     text_threshold=TEXT_THRESHOLD
 )
 
-# annotate image with detections
 box_annotator = sv.BoxAnnotator()
+label_annotator = sv.LabelAnnotator()
+
 labels = [
-    f"{CLASSES[class_id]} {confidence:0.2f}" 
-    for _, _, confidence, class_id, _, _
-    in detections]
-annotated_frame = box_annotator.annotate(scene=image.copy(), detections=detections, labels=labels)
+     f"{CLASSES[class_id]} {confidence:0.2f}" 
+     for _, _, confidence, class_id, _, _
+     in detections
+]
+
+annotated_frame = image.copy()
+
+annotated_frame = box_annotator.annotate(
+    scene=annotated_frame,
+    detections=detections
+)
+annotated_frame = label_annotator.annotate(
+    scene=annotated_frame,
+    detections=detections,
+    labels=labels
+)
 
 # save the annotated grounding dino image
 cv2.imwrite("EfficientSAM/LightHQSAM/groundingdino_annotated_image.jpg", annotated_frame)
@@ -95,15 +108,27 @@ detections.mask = segment(
     xyxy=detections.xyxy
 )
 
+labels = [
+     f"{CLASSES[class_id]} {confidence:0.2f}" 
+     for _, _, confidence, class_id, _, _
+     in detections
+]
+
 # annotate image with detections
 box_annotator = sv.BoxAnnotator()
 mask_annotator = sv.MaskAnnotator()
+#label_annotator = sv.LabelAnnotator(text_position=sv.Position.Center_OF_MASS)
+label_annotator = sv.LabelAnnotator()
+
 labels = [
     f"{CLASSES[class_id]} {confidence:0.2f}" 
     for _, _, confidence, class_id, _, _
-    in detections]
+    in detections
+]
+
 annotated_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
-annotated_image = box_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
+annotated_image = box_annotator.annotate(scene=annotated_image, detections=detections)
+annotated_image = label_annotator.annotate(scene=annotated_image, detections=detections, labels=labels)
 
 # save the annotated grounded-sam image
 cv2.imwrite("EfficientSAM/LightHQSAM/grounded_light_hqsam_annotated_image.jpg", annotated_image)
