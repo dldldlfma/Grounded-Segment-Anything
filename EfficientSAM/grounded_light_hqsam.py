@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 import supervision as sv
@@ -12,14 +13,16 @@ from LightHQSAM.setup_light_hqsam import setup_model
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # GroundingDINO config and checkpoint
-GROUNDING_DINO_CONFIG_PATH = "GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
-GROUNDING_DINO_CHECKPOINT_PATH = "./groundingdino_swint_ogc.pth"
+
+BASE_PATH = "/home/saige/Workspace/Grounded-Segment-Anything/"
+GROUNDING_DINO_CONFIG_PATH = os.path.join(BASE_PATH,"GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py")
+GROUNDING_DINO_CHECKPOINT_PATH = os.path.join(BASE_PATH,"groundingdino_swint_ogc.pth")
 
 # Building GroundingDINO inference model
 grounding_dino_model = Model(model_config_path=GROUNDING_DINO_CONFIG_PATH, model_checkpoint_path=GROUNDING_DINO_CHECKPOINT_PATH, device=DEVICE)
 
 # Building MobileSAM predictor
-HQSAM_CHECKPOINT_PATH = "./EfficientSAM/sam_hq_vit_tiny.pth"
+HQSAM_CHECKPOINT_PATH = os.path.join(BASE_PATH,"EfficientSAM/sam_hq_vit_tiny.pth")
 checkpoint = torch.load(HQSAM_CHECKPOINT_PATH, map_location=DEVICE)
 light_hqsam = setup_model()
 light_hqsam.load_state_dict(checkpoint, strict=True)
@@ -29,7 +32,7 @@ sam_predictor = SamPredictor(light_hqsam)
 
 
 # Predict classes and hyper-param for GroundingDINO
-SOURCE_IMAGE_PATH = "./EfficientSAM/LightHQSAM/example_light_hqsam.png"
+SOURCE_IMAGE_PATH = os.path.join(BASE_PATH,"./EfficientSAM/LightHQSAM/example_light_hqsam.png")
 CLASSES = ["bench"]
 BOX_THRESHOLD = 0.25
 TEXT_THRESHOLD = 0.25
